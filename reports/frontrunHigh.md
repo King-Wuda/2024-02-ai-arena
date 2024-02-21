@@ -19,21 +19,18 @@ Although a player won't know exactly when the protocol will start a new round af
 ## Proof of Concept
 Lets call our player Bob.  Bob has a 1550 `eloFactor`,has staked 100 $NRN and has 10 $NRN `stakeAtRisk` in the current round of fights in the Arena. It has almost been a week since a new round was started and Bob wants to recover his stake before the round is over so he now fights a few fights while montioring the mempool to see a winning update from the `updateBattleRecord()` function. 
 
-He spots a winning a transaction in the mempool and with his `eloFactor` as 1600, he calculates his `stakingFactor` using:
-
-```solidity
-    uint256 stakingFactor_ = FixedPointMathLib.sqrt(
-          (amountStaked[tokenId] + stakeAtRisk) / 10**18
-      );
-```
-
-This comes out to `sqrt(100)`. He now calculates his `curStakeAtRisk` with:
+He spots a winning a transaction in the mempool and he now calculates his `curStakeAtRisk` with:
 
 ```solidity
 curStakeAtRisk = (bpsLostPerLoss * (amountStaked[tokenId] + stakeAtRisk)) / 10**4;
 ```
-And re
+And realises to have a value of 10 $NRN `curStakeAtRisk` he needs to stake about 10000 $NRN. He frontruns the `updateBattleRecord()` and reclaims his `stakeAtRisk` when the `_addResultsPoints()` function calls:
+
+```solidity
+_stakeAtRiskInstance.reclaimNRN(curStakeAtRisk, tokenId, fighterOwner);
+```
 
 ## Tools Used
+Manual review.
 
 ## Recommended Mitigation Steps

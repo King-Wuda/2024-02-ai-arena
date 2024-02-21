@@ -5,7 +5,7 @@ https://github.com/code-423n4/2024-02-ai-arena/blob/cd1a0e6d1b40168657d1aaee8223
 https://github.com/code-423n4/2024-02-ai-arena/blob/cd1a0e6d1b40168657d1aaee8223dc050e15f8cc/src/RankedBattle.sol#L472-L490
 
 ## Impact
-Attacker can prevent deduction of points to zero and therefore gain $NRN distributed at the end of the round. They will also avoid having their stake put at risk in any further losses until their points are reduced to zero.
+Any player can prevent deduction of points to zero and therefore gain $NRN distributed at the end of the round. They will also avoid having their stake put at risk in any further losses until their points are reduced to zero. It should be noted that this vulnerability can occur naturally as well while users are playing the game.
 
 ## Vulnerability details
 After a fight has taken place on the game server, the results are pushed onto the blockchain with the `updateBattleRecord()` function. After that if the user has staked their $NRN for that round the results are further pushed to the `_addResultPoints` function. The problem occurs here where the points are supposed to deducted if the fighter NFt has lost a fight, if the address of the nft owner has multiple NFTs fighting, its possible to cause the `accumulatedPointsPerAddress[fighterOwner][roundId] -= points` to underflow thereby resulting in the function reverting.

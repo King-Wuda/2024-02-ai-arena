@@ -109,9 +109,9 @@ contract NeuronTest is Test {
     }
 
     /// @notice Test admin setting up airdrop and checking if the correct allowances were set.
-    function testSetupAirdropFromAdmin() public { // each user takes up 24726 with allowance check, 1214 uesrs to finish gas
-        address[] memory recipients = new address[](2214);
-        uint256[] memory amounts = new uint256[](2214);
+    function testSetupAirdropGasError() public { // each user takes up 24726 with allowance check, 1214 uesrs to finish gas
+        address[] memory recipients = new address[](11314);
+        uint256[] memory amounts = new uint256[](11314);
         uint32 j = 3;
         for (uint32 i = 0; i < recipients.length; i++) {
         recipients[i] = vm.addr(j);

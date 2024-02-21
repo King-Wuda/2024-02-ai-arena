@@ -195,6 +195,45 @@ contract MergingPoolTest is Test {
         assertEq(numRewards, 0);
     }
 
+    //////////////////////////// POC /////////////////////////
+    /////////////////////////////////////////////////////////
+
+    function testWrongCustomAttributes() public {
+        _mintFromMergingPool(_ownerAddress);
+        _mintFromMergingPool(_DELEGATED_ADDRESS);
+        assertEq(_fighterFarmContract.ownerOf(0), _ownerAddress);
+        assertEq(_fighterFarmContract.ownerOf(1), _DELEGATED_ADDRESS);
+        uint256[] memory _winners = new uint256[](2);
+        _winners[0] = 0;
+        _winners[1] = 1;
+        // winners of roundId 0 are picked
+        _mergingPoolContract.pickWinner(_winners);
+        assertEq(_mergingPoolContract.isSelectionComplete(0), true);
+        assertEq(_mergingPoolContract.winnerAddresses(0, 0) == _ownerAddress, true);
+        // winner matches ownerOf tokenId
+        assertEq(_mergingPoolContract.winnerAddresses(0, 1) == _DELEGATED_ADDRESS, true);
+        string[] memory _modelURIs = new string[](2);
+        _modelURIs[0] = "ipfs://bafybeiaatcgqvzvz3wrjiqmz2ivcu2c5sqxgipv5w2hzy4pdlw7hfox42m";
+        _modelURIs[1] = "ipfs://bafybeiaatcgqvzvz3wrjiqmz2ivcu2c5sqxgipv5w2hzy4pdlw7hfox42m";
+        string[] memory _modelTypes = new string[](2);
+        _modelTypes[0] = "original";
+        _modelTypes[1] = "original";
+        uint256[2][] memory _customAttributes = new uint256[2][](2);
+        _customAttributes[0][0] = uint256(5);
+        _customAttributes[0][1] = uint256(800);
+        _customAttributes[1][0] = uint256(5);
+        _customAttributes[1][1] = uint256(800);
+        // winners of roundId 1 are picked
+        _mergingPoolContract.pickWinner(_winners);
+        // winner claims rewards for previous roundIds
+        vm.expectRevert(bytes(''));
+        _mergingPoolContract.claimRewards(_modelURIs, _modelTypes, _customAttributes);
+        // other winner claims rewards for previous roundIds
+        vm.prank(_DELEGATED_ADDRESS);
+        vm.expectRevert(bytes(''));
+        _mergingPoolContract.claimRewards(_modelURIs, _modelTypes, _customAttributes);
+    }
+
     /// @notice Test getting the unclaimed amount for an address owning 2 fighters that's been included in 2 rounds of picked winners.
     function testGetUnclaimedRewardsForWinnerOfMultipleRoundIds() public {
         _mintFromMergingPool(_ownerAddress);

